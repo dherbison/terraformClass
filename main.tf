@@ -14,32 +14,31 @@ provider "docker" {}
 
 resource "null_resource" "dockervol" {
 	provisioner "local-exec" {
-		command = "mkdir ~/environment/noderedvol/ || true && sudo chown -R 1000:1000 ~/environment/noderedvol/"
+		command = "mkdir noderedvol/ || true && sudo chown -R 1000:1000 noderedvol/"
 	}
 }
 
 resource "random_pet" "server" {
-  count     = var.numberOfInstances
-  length    = 2
+  count     = local.numberOfInstances
   separator = "_"
 }
 
 resource "docker_image" "nodered_image" {
   # name of image
-  name = "nodered/node-red:latest"
+  name = var.image[terraform.workspace]
 }
 
 resource "docker_container" "nodered_container" {
-  count = var.numberOfInstances
-  name  = join("_", ["nodered", random_pet.server[count.index].id])
+  count = local.numberOfInstances
+  name  = join("_", ["nodered", terraform.workspace, random_pet.server[count.index].id])
   image = docker_image.nodered_image.latest
   ports {
     internal = var.internalPort
-    external = var.externalPort
+    external = var.externalPort[terraform.workspace][count.index]
   }
   volumes {
   	container_path = "/data"
-  	host_path = "/home/ubuntu/environment/noderedvol"
+  	host_path = "${path.cwd}/noderedvol"
   }
 }
 

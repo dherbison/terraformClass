@@ -1,0 +1,9 @@
+
+#31 is the color
+EXTERNALIP=$(curl http:/169.254.169.254/latest/meta-data/public-ipv4 | sed 's/\./-/g')
+PS1=$(echo $EXTERNALIP | awk '{print "\\e[1;32m" $0 " \\w: \\e[0m"}' )
+
+alias lnk=$(echo "http://ec2-${EXTERNALIP}.us-east-2.compute.amazonaws.com:1880/")
+[[ -s "$HOME/.profile" ]] && source "$HOME/.profile" # Load the default .profile
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
